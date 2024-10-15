@@ -1,23 +1,49 @@
 import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 import 'package:flutter/material.dart';
+import 'package:mobile/models/conta.dart';
 import 'package:mobile/services/conta_service.dart';
 
-class AdicionarConta extends StatelessWidget {
+class AdicionarConta extends StatefulWidget {
+  Conta? conta;
+
+  AdicionarConta({this.conta, super.key});
+
+  @override
+  _AdicionarContaState createState() => _AdicionarContaState();
+}
+
+class _AdicionarContaState extends State<AdicionarConta> {
   ContaService contaService = ContaService("contas");
 
   TextEditingController descricao = TextEditingController();
   TextEditingController valor = TextEditingController();
 
-  AdicionarConta({super.key});
+  String buttonText = "";
 
-  void add() async {
-    String desc = descricao.text;
-    String val = valor.text;
+  Future<void> add() async {
+    if (widget.conta != null) {
+      var update = {'descricao': descricao.text, 'val': valor.text};
+      await contaService.update(widget.conta!.id, update);
+    } else {
+      String desc = descricao.text;
+      String val = valor.text;
 
-    if (desc.isNotEmpty) {
-      var conta = {'descricao': desc, 'val': val};
+      if (desc.isNotEmpty) {
+        var conta = {'descricao': desc, 'val': val};
 
-      await contaService.create(conta);
+        await contaService.create(conta);
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    if (widget.conta != null) {
+      buttonText = "Atualizar";
+      descricao.text = widget.conta!.descricao;
+      valor.text = widget.conta!.valor;
+    } else {
+      buttonText = "Cadastrar";
     }
   }
 
@@ -87,7 +113,7 @@ class AdicionarConta extends StatelessWidget {
                   borderRadius: BorderRadius.circular(15.0),
                   child: InkWell(
                     onTap: () async {
-                      add();
+                      await add();
                       Navigator.pop(context);
                     },
                     borderRadius: BorderRadius.circular(15.0),
@@ -107,7 +133,7 @@ class AdicionarConta extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              "Cadastrar",
+                              buttonText,
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,

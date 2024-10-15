@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 import 'package:mobile/models/conta.dart';
 import 'package:mobile/screens/adicionar_conta_page.dart';
 import 'package:mobile/services/conta_service.dart';
@@ -32,6 +33,11 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  void deleteConta(String id) async {
+    await contaService.delete(id);
+    getContas();
+  }
+
   @override
   void initState() {
     getContas();
@@ -55,26 +61,68 @@ class _HomePageState extends State<HomePage> {
           itemBuilder: (context, index) {
             return Column(
               children: [
-                Row(
-                  children: [
-                    Text("Nome da conta: "),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Text(contasArray[index].descricao),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Text("Valor: "),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Text(contasArray[index].valor),
-                  ],
-                ),
+                Container(
+                    padding: EdgeInsets.all(10.0),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5.0),
+                        border: Border.all(
+                            color: const Color.fromARGB(82, 0, 0, 0),
+                            width: 1.0)),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Text("Nome da conta: "),
+                                Text(contasArray[index].descricao)
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Text("Valor: R\$ "),
+                                Text(contasArray[index].valor)
+                              ],
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            GestureDetector(
+                              child: Icon(Icons.edit),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => AdicionarConta(
+                                            conta: contasArray[index],
+                                          )),
+                                ).then((arg) {
+                                  getContas();
+                                });
+                              },
+                            ),
+                            SizedBox(
+                              width: 15.0,
+                            ),
+                            GestureDetector(
+                              child: Icon(Icons.delete),
+                              onTap: () {
+                                deleteConta(contasArray[index].id);
+                              },
+                            )
+                          ],
+                        )
+                      ],
+                    )),
+                SizedBox(
+                  height: 10.0,
+                )
               ],
             );
           },
@@ -92,7 +140,9 @@ class _HomePageState extends State<HomePage> {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => AdicionarConta()),
-          );
+          ).then((arg) {
+            getContas();
+          });
         },
       ),
     );
