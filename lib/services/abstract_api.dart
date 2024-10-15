@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 
 abstract class AbstractApi {
@@ -9,6 +11,12 @@ abstract class AbstractApi {
 
   Future<String> getAll() async {
     var response = await http.get(Uri.parse("$urlLocalHost/$_recurso"));
+    return response.body;
+  }
+
+  Future<String> create(dynamic data) async {
+    var response = await http.post(Uri.parse("$urlLocalHost/$_recurso"),
+        body: jsonEncode(data));
     return response.body;
   }
 }
